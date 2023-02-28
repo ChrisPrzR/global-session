@@ -1,0 +1,14 @@
+{
+  "name": "global-session",
+  "version": "1.0.0",
+  "description": "Store for session and avoid logging in",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-persist": "^3.1.2"
+  }
+}
