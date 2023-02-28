@@ -1,5 +1,11 @@
 const storage = require('node-persist');
 
+/**
+  * Extracts data from local storage.
+  * Use after loging in
+  * @param page Page object in use
+  * @returns Session object
+  */
 const extractSession = async(page) => {
     await page.evaluate(() => {
       const json = {};
@@ -16,14 +22,29 @@ const storeData = async(state, sessionData, config) => {
   return await storage.setItem(state, sessionData)
 }
 
-const getData = async(state, config) => {
+/**
+  * Retrieves locally stored data
+  * @param state String -> 'pa', 
+  * @param config Object default -> { ttl:1000*60*5 }
+  * config options {dir:path, ttl: timetolive(JS Date or miliseconds)}
+  * @returns sessionData locally stored
+  */
+const getSession = async(state, config = { ttl:1000*60*5 }) => {
   await storage.init({...config});
   return await storage.getItem(state)
 }
 
-const storeSession = async(state, data, config) => {
+/**
+  * Stores data locally
+  * @param state String -> 'pa', 
+  * @param sessionData Object
+  * @param config Object default -> { ttl:1000*60*5 }
+  * config options {dir:path, ttl: timetolive(JS Date or miliseconds)}
+  * @returns sessionData locally stored
+  */
+const storeSession = async(state, data, config = { ttl:1000*60*5 }) => {
   let value;
-  value = await getData(state, config);
+  value = await getSession(state, config);
 
   if (!value){
     ({content: {value}} = await storeData(state, data, config));
@@ -31,6 +52,10 @@ const storeSession = async(state, data, config) => {
   return value
 }
 
+/**
+  * Inserts session data to browser
+  * @param sessionData Object
+  */
 const insertSession = async (data) => {
   await page.evaluate(() => {
     for (let i = 0; i < Object.keys(data).length; i++) {
@@ -40,25 +65,9 @@ const insertSession = async (data) => {
   });
 }
 
-
-async function run() {
-  const session = {
-    WEB_USER_AUTHENTICATION: '{"ID":"2d38d4e7-eeb5-47f2-9697-509a4c249539","VALUE":{"WEB_USER_ID":95854,"USERNAME":"MAINPAFILER","WEB_USER_GROUP":1,"LAST_ACTION_TIMESTAMP":"2023-02-27T13:56:46.5067253"},"EXPIRES_ON":"2023-02-27T14:56:46.5067253","LAST_DB_UPDATE":"2023-02-27T13:56:46.5067253"}',
-    CART_QUANTITY: '{"quantity":3,"trigger":"iGOcm330"}',
-    EVENT_LOGIN: '{"initialAuthCheck":false,"FIRST_NAME":"DUSTIN","MIDDLE_NAME":null,"LAST_NAME":"RAY","ORG_NAME":"","WEB_USER_ID":95854,"USERNAME":"MAINPAFILER","USER_GROUP":"WEB","isFrequentPayor":false,"EMAIL":"efile1237@incfile.com","loggedIn":true,"trigger":"YI6bmqql","PHONE":"888-462-3453"}',
-    USER_CACHE: '{"95854":"business"}',
-    AUTH_TIMEOUT: '3539984',
-    WEB_USER: '{"OKTA_ID":null,"KEYSTONE_GUID":null,"WEB_USER_ID":95854,"USER_TYPE_ID":1,"USERNAME":"MAINPAFILER","EMAIL":"efile1237@incfile.com","FIRST_NAME":"DUSTIN","MIDDLE_NAME":null,"LAST_NAME":"RAY","LAST_LOGIN_DATE":"2023-02-27T13:56:46.163","PHONE":"888-462-3453","ORG_NAME":"","IS_FREQUENT_PAYOR_YN":false,"BOSS_NAVIGATION_URL":null}',
-    EVENT_SET_TIMEOUT: '{"paddedTimeout":3539984,"eventCheckTimeout":3239984,"trigger":"NQ5moXVN"}',
-    LAST_USERS_GROUP: '"WEB"'
-  }
-  
-  const data = await storeSession('pa', session, { ttl:1000*60*5 })
-  console.log(data);
-}
-
-modules.export = {
+module.exports = {
   extractSession,
   insertSession,
   storeSession,
+  getSession
 }
