@@ -7,7 +7,7 @@ const storage = require('node-persist');
   * @returns Session object
   */
 const extractSession = async(page) => {
-    await page.evaluate(() => {
+    const data = await page.evaluate(() => {
       const json = {};
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -15,6 +15,8 @@ const extractSession = async(page) => {
       }
       return json;
     });
+
+    return data
 };
 
 const storeData = async(state, sessionData, config) => {
@@ -56,13 +58,13 @@ const storeSession = async(state, data, config = { ttl:1000*60*5 }) => {
   * Inserts session data to browser
   * @param sessionData Object
   */
-const insertSession = async (data) => {
-  await page.evaluate(() => {
+const insertSession = async (page, data) => {
+  await page.evaluate((data) => {
     for (let i = 0; i < Object.keys(data).length; i++) {
       const key = Object.keys(data)[i];
       localStorage.setItem(key, data[key]);
     }
-  });
+  }, data);
 }
 
 module.exports = {
