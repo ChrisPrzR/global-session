@@ -37,6 +37,19 @@ const getSession = async(state, config = { ttl:1000*60*5 }) => {
 }
 
 /**
+  * Updates session data
+  * @param state String -> 'pa', 
+  * @param sessionData Object
+  * @param config Object default -> { ttl:1000*60*5 }
+  * config options {dir:path, ttl: timetolive(JS Date or miliseconds)}
+  * @returns sessionData locally stored
+  */
+const updateSession = async(state, sessionData, config = { ttl:1000*60*5 }) => {
+  await storage.init({...config});
+  return await storage.updateItem(state, sessionData, config)
+}
+
+/**
   * Stores data locally
   * @param state String -> 'pa', 
   * @param sessionData Object
@@ -70,6 +83,7 @@ const insertSession = async (page, data) => {
 module.exports = {
   extractSession,
   insertSession,
+  updateSession,
   storeSession,
   getSession
 }
